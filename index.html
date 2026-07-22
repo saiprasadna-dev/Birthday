@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday 💗</title>
+  <meta name="description" content="A little birthday surprise, made with love." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Infant:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Great+Vibes&family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- Particle / cursor canvas layers -->
+  <canvas id="fx-canvas" aria-hidden="true"></canvas>
+  <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+  <!-- Custom cursor glow -->
+  <div class="cursor-glow" aria-hidden="true"></div>
+
+  <!-- Music toggle -->
+  <button id="music-toggle" class="music-toggle" aria-label="Play background music" title="Play music">
+    <svg class="icon-music" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <path d="M9 18V5l12-2v13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="18" cy="16" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    </svg>
+    <svg class="icon-muted" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <path d="M9 18V5l12-2v13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="18" cy="16" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
+  <audio id="bg-music" loop preload="none"></audio>
+
+  <!-- ============ INTRO: ENVELOPE ============ -->
+  <div id="intro" class="intro">
+    <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Open your gift">
+      <div class="env-flap"></div>
+      <div class="env-body"></div>
+      <div class="env-letter">
+        <span class="env-heart">♥</span>
+      </div>
+      <div class="env-seal">♥</div>
+    </div>
+    <p class="intro-hint" id="intro-hint"></p>
+    <button class="btn-primary intro-btn" id="intro-btn"></button>
+  </div>
+
+  <!-- ============ MAIN EXPERIENCE ============ -->
+  <main id="stage" class="stage" hidden>
+
+    <!-- HERO -->
+    <section class="scene hero" id="hero">
+      <div class="hero-inner">
+        <p class="eyebrow reveal">✦ &nbsp;A day worth celebrating&nbsp; ✦</p>
+        <h1 class="hero-title reveal">
+          <span class="hero-line1" id="hero-line1"></span>
+          <span class="hero-name" id="hero-name"></span>
+        </h1>
+        <p class="hero-type"><span id="typewriter"></span><span class="caret" aria-hidden="true">|</span></p>
+
+        <div class="cake reveal" id="cake" title="Blow out the candles">
+          <div class="cake-plate"></div>
+          <div class="cake-base"></div>
+          <div class="cake-icing"></div>
+          <div class="candle"><span class="flame"></span></div>
+          <div class="candle"><span class="flame"></span></div>
+          <div class="candle"><span class="flame"></span></div>
+        </div>
+        <p class="cake-hint reveal" id="cake-hint">psst — try blowing out the candles 🎂</p>
+
+        <button class="btn-primary reveal" id="hero-btn"></button>
+      </div>
+      <div class="scroll-cue" aria-hidden="true"><span></span></div>
+    </section>
+
+    <!-- COUNTDOWN -->
+    <section class="scene countdown-scene" id="countdown">
+      <div class="glass panel reveal">
+        <h2 class="script-h">Counting the moments</h2>
+        <div class="count-grid" id="count-grid"></div>
+        <p class="count-sub" id="count-sub"></p>
+      </div>
+    </section>
+
+    <!-- REASONS -->
+    <section class="scene reasons-scene" id="reasons">
+      <h2 class="script-h reveal" id="reasons-title"></h2>
+      <p class="section-intro reveal" id="reasons-intro"></p>
+      <div class="reason-stage reveal">
+        <div class="reason-card glass" id="reason-card">
+          <span class="reason-quote">“</span>
+          <p class="reason-text" id="reason-text"></p>
+          <span class="reason-count" id="reason-count"></span>
+        </div>
+        <button class="heart-btn" id="reason-next" aria-label="Show another reason">
+          <span class="heart-btn-core">♥</span>
+          <span class="heart-btn-ring"></span>
+        </button>
+      </div>
+    </section>
+
+    <!-- MEMORIES -->
+    <section class="scene memories-scene" id="memories">
+      <h2 class="script-h reveal" id="memories-title"></h2>
+      <p class="section-intro reveal" id="memories-intro"></p>
+      <div class="memory-grid" id="memory-grid"></div>
+    </section>
+
+    <!-- LETTER -->
+    <section class="scene letter-scene" id="letter">
+      <div class="glass letter-card reveal">
+        <h2 class="script-h" id="letter-title"></h2>
+        <div class="letter-body" id="letter-body"></div>
+        <p class="letter-signoff" id="letter-signoff"></p>
+        <p class="letter-name script-h" id="letter-name"></p>
+        <button class="btn-primary wish-btn" id="wish-btn"></button>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p id="footer-text"></p>
+    </footer>
+  </main>
+
+  <!-- Lightbox for memories -->
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lightbox-close" id="lightbox-close" aria-label="Close">✕</button>
+    <div class="lightbox-inner" id="lightbox-inner"></div>
+  </div>
+
+  <!-- Big wish overlay -->
+  <div class="wish-overlay" id="wish-overlay" hidden>
+    <p class="wish-text script-h" id="wish-text"></p>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
