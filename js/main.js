@@ -266,45 +266,57 @@
     const base = new Date(dateStr + "T00:00:00");
     if (isNaN(base)) return null;
     let target = new Date(now.getFullYear(), base.getMonth(), base.getDate(), 0, 0, 0);
-    if (target < now) target.setFullYear(now.getFullYear() + 1);
+    // Only roll to next year once the birthday has fully passed — never on the
+    // day itself, so the countdown reads zero (and celebrates) on the big day.
+    const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (target < todayMidnight) target.setFullYear(now.getFullYear() + 1);
     return target;
   }
   const grid = $("#count-grid");
   const countSub = $("#count-sub");
   const target = CFG.birthday ? nextBirthday(CFG.birthday) : null;
+  const birthdayDate = CFG.birthday ? new Date(CFG.birthday + "T00:00:00") : null;
+  let celebrated = false;
 
   function pad(n) { return String(n).padStart(2, "0"); }
   function renderCountdown() {
     if (!grid) return;
     const now = new Date();
+    const subParts = [];
+
     if (target) {
-      let diff = Math.max(0, target - now);
-      const isToday = (now.getMonth() === new Date(CFG.birthday + "T00:00:00").getMonth() &&
-                       now.getDate() === new Date(CFG.birthday + "T00:00:00").getDate());
-      const d = Math.floor(diff / 86400000);
-      const h = Math.floor((diff % 86400000) / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      cells([["Days", d], ["Hours", pad(h)], ["Minutes", pad(m)], ["Seconds", pad(s)]]);
-      if (isToday && diff > 86400000 * 0.999) { /* rare edge */ }
-      if (d === 0 && h === 0 && m === 0 && s === 0) {
-        countSub.textContent = "🎉 It's finally here — Happy Birthday! 🎉";
-        confettiRain(3000);
-      } else if (isToday) {
-        countSub.textContent = "It's your day today, my love. 🎂";
+      const isBirthdayToday = birthdayDate && !isNaN(birthdayDate) &&
+        now.getMonth() === birthdayDate.getMonth() &&
+        now.getDate() === birthdayDate.getDate();
+
+      if (isBirthdayToday) {
+        // The big day — zero the clock and celebrate once (this runs every
+        // second, so guard the confetti so it doesn't loop all day).
+        cells([["Days", 0], ["Hours", "00"], ["Minutes", "00"], ["Seconds", "00"]]);
+        subParts.push("🎉 It's finally here — Happy Birthday! 🎂");
+        if (!celebrated) { celebrated = true; confettiRain(3000); }
       } else {
-        countSub.textContent = "…until we celebrate you again.";
+        const diff = Math.max(0, target - now);
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        cells([["Days", d], ["Hours", pad(h)], ["Minutes", pad(m)], ["Seconds", pad(s)]]);
+        subParts.push("…until we celebrate you again.");
       }
     }
+
     // Days together
     if (CFG.togetherSince) {
       const since = new Date(CFG.togetherSince + "T00:00:00");
       if (!isNaN(since)) {
         const days = Math.floor((now - since) / 86400000);
         if (!target) cells([["Days together", days.toLocaleString()]]);
-        countSub.textContent = (target ? countSub.textContent + "  ·  " : "") + days.toLocaleString() + " days of us — and counting.";
+        subParts.push(days.toLocaleString() + " days of us — and counting.");
       }
     }
+
+    if (countSub) countSub.textContent = subParts.join("  ·  ");
   }
   function cells(list) {
     if (!grid) return;
