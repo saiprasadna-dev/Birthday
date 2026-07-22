@@ -29,11 +29,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure Pages
-        # enablement: true turns the site on automatically the first time,
-        # so no manual Settings toggle is needed.
+        # Requires Pages to be enabled once with Source = "GitHub Actions"
+        # (Settings -> Pages). The Actions token can't enable it automatically.
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Upload site artifact
         # The site is a static, no-build project served from the repo root.
