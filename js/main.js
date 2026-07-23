@@ -1,5 +1,5 @@
 /* =====================================================================
-   Happy Birthday — interaction engine (vanilla JS, no dependencies)
+   Happy Birthday — page-by-page experience (vanilla JS, no dependencies)
    ===================================================================== */
 (function () {
   "use strict";
@@ -11,64 +11,50 @@
   const isTouch = window.matchMedia("(hover: none)").matches;
   if (isTouch) document.body.classList.add("touch");
 
+  function text(id, val) { const el = document.getElementById(id); if (el != null && val != null) el.textContent = val; }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
   /* ------------------------------------------------------------------
      Populate content from config
   ------------------------------------------------------------------ */
-  function text(id, val) { const el = document.getElementById(id); if (el != null && val != null) el.textContent = val; }
-
-  text("intro-hint", CFG.envelopeHint);
-  text("intro-btn", CFG.envelopeButton);
+  text("intro-hint", CFG.introHint);
+  text("intro-btn", CFG.introButton);
   text("hero-line1", CFG.heroTitle);
   text("hero-name", CFG.herName);
-  text("hero-btn", CFG.heroButton);
-  text("cake-hint", "psst — try blowing out the candles 🎂");
-  text("reasons-title", CFG.reasonsTitle);
-  text("reasons-intro", CFG.reasonsIntro);
+  text("cake-hint", CFG.cakeHint);
+  text("hero-next", CFG.heroButton);
+  text("wishes-intro", CFG.wishesIntro);
+  text("wish-reveal", CFG.revealButton);
+  text("wish-done", CFG.storylaneButton);
   text("memories-title", CFG.memoriesTitle);
   text("memories-intro", CFG.memoriesIntro);
-  text("letter-title", CFG.letterTitle);
-  text("letter-signoff", CFG.letterSignoff);
-  text("letter-name", CFG.yourName);
-  text("wish-btn", CFG.wishButton);
-  text("wish-text", CFG.wishMessage);
+  text("memories-next", CFG.memoriesButton);
+  text("finale-title", CFG.finaleTitle);
+  text("finale-close", CFG.finaleClose);
+  text("finale-name", (CFG.finaleSignoff || "Forever yours,") + " " + (CFG.yourName || ""));
+  text("finale-btn", CFG.finaleButton);
+  text("countdown-title", CFG.countdownTitle);
+  text("replay-btn", CFG.replayButton);
+  text("wish-text", CFG.cakeWish);
   text("footer-text", "Made with all my love, for " + (CFG.herName || "you") + " · " + (CFG.yourName || ""));
 
-  // Letter body paragraphs
-  const letterBody = $("#letter-body");
-  if (letterBody && Array.isArray(CFG.letterBody)) {
-    letterBody.innerHTML = "";
-    CFG.letterBody.forEach((p) => { const el = document.createElement("p"); el.textContent = p; letterBody.appendChild(el); });
+  const finaleBody = $("#finale-body");
+  if (finaleBody && Array.isArray(CFG.finaleBody)) {
+    finaleBody.innerHTML = "";
+    CFG.finaleBody.forEach((p) => { const el = document.createElement("p"); el.textContent = p; finaleBody.appendChild(el); });
   }
-
   document.title = "Happy Birthday, " + (CFG.herName || "You") + " 💗";
 
   /* ------------------------------------------------------------------
-     Cursor glow + trail
-  ------------------------------------------------------------------ */
-  const glow = $(".cursor-glow");
-  if (glow && !isTouch && !reduceMotion) {
-    let mx = window.innerWidth / 2, my = window.innerHeight / 2, gx = mx, gy = my;
-    window.addEventListener("mousemove", (e) => { mx = e.clientX; my = e.clientY; });
-    (function follow() {
-      gx += (mx - gx) * 0.2; gy += (my - gy) * 0.2;
-      glow.style.transform = `translate(${gx}px, ${gy}px)`;
-      requestAnimationFrame(follow);
-    })();
-    document.addEventListener("mouseleave", () => glow.style.opacity = "0");
-    document.addEventListener("mouseenter", () => glow.style.opacity = "1");
-  } else if (glow) {
-    glow.style.display = "none";
-  }
-
-  /* ------------------------------------------------------------------
-     Ambient particles (hearts / petals / sparkles) on #fx-canvas
+     Ambient particles + confetti (shared across all pages)
   ------------------------------------------------------------------ */
   const fx = $("#fx-canvas");
   const fctx = fx.getContext("2d");
   let W, H, DPR;
   const petals = [];
-  const GLYPHS = ["♥", "❀", "✦", "♡", "❁"];
-  const COLORS = ["#fb7185", "#f472b6", "#e8c36b", "#fff2c9", "#fb7ba8"];
+  const GLYPHS = ["♥", "❀", "✿", "♡", "✦"];
+  const COLORS = ["#f472b6", "#f9a8d4", "#c4b5fd", "#fbcfe8", "#f6b64c"];
+  const CONFETTI_COLORS = ["#f63c97", "#ff92c6", "#a24be0", "#8b5cf6", "#f6b64c", "#ffffff"];
 
   function resize() {
     DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -84,15 +70,15 @@
   function makePetal() {
     return {
       x: Math.random() * W, y: -20 - Math.random() * H,
-      size: 10 + Math.random() * 18, speed: 0.4 + Math.random() * 1.1,
-      drift: (Math.random() - 0.5) * 0.8, rot: Math.random() * Math.PI * 2,
+      size: 10 + Math.random() * 16, speed: 0.35 + Math.random() * 0.9,
+      drift: (Math.random() - 0.5) * 0.7, rot: Math.random() * Math.PI * 2,
       vr: (Math.random() - 0.5) * 0.02, sway: Math.random() * Math.PI * 2,
       glyph: GLYPHS[(Math.random() * GLYPHS.length) | 0],
       color: COLORS[(Math.random() * COLORS.length) | 0],
-      alpha: 0.35 + Math.random() * 0.45,
+      alpha: 0.35 + Math.random() * 0.4,
     };
   }
-  const PETAL_COUNT = reduceMotion ? 0 : (W < 640 ? 22 : 40);
+  const PETAL_COUNT = reduceMotion ? 0 : (W < 640 ? 20 : 38);
   for (let i = 0; i < PETAL_COUNT; i++) { const p = makePetal(); p.y = Math.random() * H; petals.push(p); }
 
   function drawPetals() {
@@ -111,9 +97,6 @@
   }
   if (PETAL_COUNT > 0) drawPetals();
 
-  /* ------------------------------------------------------------------
-     Confetti engine on #confetti-canvas
-  ------------------------------------------------------------------ */
   const cc = $("#confetti-canvas");
   const cctx = cc.getContext("2d");
   let confetti = [];
@@ -128,14 +111,13 @@
       confetti.push({
         x, y,
         vx: Math.cos(angle) * power, vy: Math.sin(angle) * power - 4,
-        size: 5 + Math.random() * 7, color: COLORS[(Math.random() * COLORS.length) | 0],
+        size: 5 + Math.random() * 7, color: CONFETTI_COLORS[(Math.random() * CONFETTI_COLORS.length) | 0],
         rot: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.3,
         life: 1, shape: Math.random() > 0.5 ? "rect" : "circ",
       });
     }
     if (!confettiRunning) { confettiRunning = true; runConfetti(); }
   }
-
   function runConfetti() {
     cctx.clearRect(0, 0, W, H);
     for (let i = confetti.length - 1; i >= 0; i--) {
@@ -151,7 +133,6 @@
     if (confetti.length > 0) requestAnimationFrame(runConfetti);
     else { cctx.clearRect(0, 0, W, H); confettiRunning = false; }
   }
-
   function confettiRain(duration) {
     if (reduceMotion) return;
     const end = Date.now() + (duration || 2200);
@@ -168,7 +149,6 @@
   const musicBtn = $("#music-toggle");
   let musicReady = false;
   if (CFG.musicFile) { audio.src = CFG.musicFile; musicReady = true; }
-
   function tryPlayMusic() {
     if (!musicReady) return;
     audio.volume = 0;
@@ -177,235 +157,223 @@
       p.then(() => {
         musicBtn.classList.add("playing");
         musicBtn.setAttribute("aria-label", "Pause background music");
-        // gentle fade-in
-        let v = 0; const fade = setInterval(() => { v = Math.min(0.6, v + 0.03); audio.volume = v; if (v >= 0.6) clearInterval(fade); }, 80);
-      }).catch(() => { /* autoplay blocked — user can press the button */ });
+        let v = 0; const fade = setInterval(() => { v = Math.min(0.55, v + 0.03); audio.volume = v; if (v >= 0.55) clearInterval(fade); }, 80);
+      }).catch(() => {});
     }
   }
   musicBtn.addEventListener("click", () => {
     if (!musicReady) { musicBtn.animate([{ transform: "scale(1)" }, { transform: "scale(0.9)" }, { transform: "scale(1)" }], { duration: 250 }); return; }
-    if (audio.paused) { audio.play().then(() => { audio.volume = 0.6; musicBtn.classList.add("playing"); }).catch(() => {}); }
+    if (audio.paused) { audio.play().then(() => { audio.volume = 0.55; musicBtn.classList.add("playing"); }).catch(() => {}); }
     else { audio.pause(); musicBtn.classList.remove("playing"); }
   });
 
+  /* ==================================================================
+     PAGE NAVIGATION  (one full-screen page at a time)
+  ================================================================== */
+  const screens = $$(".screen");
+  const navBack = $("#nav-back");
+  const progress = $("#progress");
+  let current = 0;
+  let animating = false;
+
+  // Build the progress dots (one per page after the intro)
+  screens.forEach((s, i) => {
+    if (i === 0) return;
+    const dot = document.createElement("button");
+    dot.className = "dot"; dot.type = "button";
+    dot.setAttribute("aria-label", "Go to page " + i);
+    dot.addEventListener("click", () => goTo(i));
+    progress.appendChild(dot);
+  });
+  const dots = $$(".dot", progress);
+
+  function updateChrome() {
+    navBack.hidden = current === 0;
+    progress.hidden = current === 0;
+    dots.forEach((d, i) => d.classList.toggle("on", i + 1 === current));
+  }
+
+  function goTo(idx) {
+    if (idx === current || animating || idx < 0 || idx >= screens.length) return;
+    const cur = screens[current];
+    const next = screens[idx];
+    current = idx;
+
+    if (reduceMotion) {
+      cur.classList.remove("is-active", "is-leaving");
+      next.classList.add("is-active");
+      afterEnter(next);
+      return;
+    }
+
+    animating = true;
+    cur.classList.add("is-leaving");
+    setTimeout(() => {
+      cur.classList.remove("is-active", "is-leaving");
+      next.classList.add("is-active");
+      afterEnter(next);
+      setTimeout(() => { animating = false; }, 450);
+    }, 300);
+  }
+  function goBack() { if (current > 0) goTo(current - 1); }
+
+  function afterEnter(screen) {
+    updateChrome();
+    window.scrollTo({ top: 0, behavior: "auto" });
+    const name = screen.dataset.name;
+    if (name === "hero") startTypewriter();
+    if (name === "countdown") { startCountdown(); confettiRain(2600); burstConfetti(W / 2, H * 0.4, 150); }
+  }
+
+  navBack.addEventListener("click", goBack);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !$("#lightbox").hidden) return; // handled by lightbox
+    if (e.key === "ArrowLeft") goBack();
+  });
+
   /* ------------------------------------------------------------------
-     Intro envelope → open experience
+     Page 0 → 1 : open the gift
   ------------------------------------------------------------------ */
-  const intro = $("#intro");
-  const envelope = $("#envelope");
-  const stage = $("#stage");
+  const gift = $("#gift");
   let opened = false;
-
-  function openExperience() {
+  function openGift() {
     if (opened) return; opened = true;
-    envelope.classList.add("open");
+    gift.classList.add("opening");
     tryPlayMusic();
-    setTimeout(() => {
-      const r = envelope.getBoundingClientRect();
-      burstConfetti(r.left + r.width / 2, r.top + r.height / 2, 160);
-    }, 350);
-    setTimeout(() => {
-      intro.classList.add("gone");
-      stage.hidden = false;
-      initReveals();
-      startTypewriter();
-      setTimeout(() => intro.remove(), 900);
-    }, 850);
+    setTimeout(() => { const r = gift.getBoundingClientRect(); burstConfetti(r.left + r.width / 2, r.top + r.height / 2, 150); }, 250);
+    setTimeout(() => goTo(1), 620);
   }
-  envelope.addEventListener("click", openExperience);
-  envelope.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openExperience(); } });
-  $("#intro-btn").addEventListener("click", openExperience);
+  gift.addEventListener("click", openGift);
+  gift.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openGift(); } });
+  $("#intro-btn").addEventListener("click", openGift);
 
-  /* ------------------------------------------------------------------
-     Scroll reveals
-  ------------------------------------------------------------------ */
-  let revealObserver;
-  function initReveals() {
-    if (reduceMotion) { $$(".reveal").forEach((el) => el.classList.add("in")); return; }
-    revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add("in"); revealObserver.unobserve(en.target); } });
-    }, { threshold: 0.18 });
-    $$(".reveal").forEach((el) => revealObserver.observe(el));
-  }
+  /* Forward buttons */
+  $("#hero-next").addEventListener("click", () => goTo(2));
+  $("#memories-next").addEventListener("click", () => goTo(4));
+  $("#finale-btn").addEventListener("click", () => goTo(5));
+  $("#replay-btn").addEventListener("click", () => goTo(1));
 
   /* ------------------------------------------------------------------
      Typewriter (hero)
   ------------------------------------------------------------------ */
+  let typed = false;
   function startTypewriter() {
     const el = $("#typewriter");
     const str = CFG.heroTypewriter || "";
     if (!el) return;
-    if (reduceMotion) { el.textContent = str; return; }
+    if (reduceMotion || typed) { el.textContent = str; typed = true; return; }
+    typed = true;
     let i = 0;
     (function type() {
-      if (i <= str.length) { el.textContent = str.slice(0, i); i++; setTimeout(type, 45); }
+      if (i <= str.length) { el.textContent = str.slice(0, i); i++; setTimeout(type, 42); }
     })();
   }
 
   /* ------------------------------------------------------------------
-     Cake: blow out candles
+     Cake: blow out candles → make a wish
   ------------------------------------------------------------------ */
   const cake = $("#cake");
+  const wishOverlay = $("#wish-overlay");
   if (cake) {
-    cake.addEventListener("click", () => {
+    function blowCake() {
+      if (cake.classList.contains("blown")) return;
       cake.classList.add("blown");
       $("#cake-hint").classList.add("hide");
       const r = cake.getBoundingClientRect();
-      burstConfetti(r.left + r.width / 2, r.top + 10, 90);
-    });
-  }
-
-  /* Hero button → scroll to countdown */
-  $("#hero-btn").addEventListener("click", () => { $("#countdown").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" }); });
-
-  /* ------------------------------------------------------------------
-     Countdown
-  ------------------------------------------------------------------ */
-  function nextBirthday(dateStr) {
-    const now = new Date();
-    const base = new Date(dateStr + "T00:00:00");
-    if (isNaN(base)) return null;
-    let target = new Date(now.getFullYear(), base.getMonth(), base.getDate(), 0, 0, 0);
-    // Only roll to next year once the birthday has fully passed — never on the
-    // day itself, so the countdown reads zero (and celebrates) on the big day.
-    const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    if (target < todayMidnight) target.setFullYear(now.getFullYear() + 1);
-    return target;
-  }
-  const grid = $("#count-grid");
-  const countSub = $("#count-sub");
-  const target = CFG.birthday ? nextBirthday(CFG.birthday) : null;
-  const birthdayDate = CFG.birthday ? new Date(CFG.birthday + "T00:00:00") : null;
-  let celebrated = false;
-
-  function pad(n) { return String(n).padStart(2, "0"); }
-  function renderCountdown() {
-    if (!grid) return;
-    const now = new Date();
-    const subParts = [];
-
-    if (target) {
-      const isBirthdayToday = birthdayDate && !isNaN(birthdayDate) &&
-        now.getMonth() === birthdayDate.getMonth() &&
-        now.getDate() === birthdayDate.getDate();
-
-      if (isBirthdayToday) {
-        // The big day — zero the clock and celebrate once (this runs every
-        // second, so guard the confetti so it doesn't loop all day).
-        cells([["Days", 0], ["Hours", "00"], ["Minutes", "00"], ["Seconds", "00"]]);
-        subParts.push("🎉 It's finally here — Happy Birthday! 🎂");
-        if (!celebrated) { celebrated = true; confettiRain(3000); }
-      } else {
-        const diff = Math.max(0, target - now);
-        const d = Math.floor(diff / 86400000);
-        const h = Math.floor((diff % 86400000) / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
-        cells([["Days", d], ["Hours", pad(h)], ["Minutes", pad(m)], ["Seconds", pad(s)]]);
-        subParts.push("…until we celebrate you again.");
+      burstConfetti(r.left + r.width / 2, r.top + 10, 100);
+      if (CFG.cakeWish && wishOverlay) {
+        wishOverlay.hidden = false;
+        setTimeout(() => { wishOverlay.hidden = true; }, 2800);
       }
     }
-
-    // Days together
-    if (CFG.togetherSince) {
-      const since = new Date(CFG.togetherSince + "T00:00:00");
-      if (!isNaN(since)) {
-        const days = Math.floor((now - since) / 86400000);
-        if (!target) cells([["Days together", days.toLocaleString()]]);
-        subParts.push(days.toLocaleString() + " days of us — and counting.");
-      }
-    }
-
-    if (countSub) countSub.textContent = subParts.join("  ·  ");
+    cake.addEventListener("click", blowCake);
+    cake.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); blowCake(); } });
   }
-  function cells(list) {
-    if (!grid) return;
-    grid.style.gridTemplateColumns = `repeat(${Math.min(4, list.length)}, 1fr)`;
-    grid.innerHTML = list.map(([label, num]) =>
-      `<div class="count-cell"><div class="count-num">${num}</div><div class="count-label">${label}</div></div>`
-    ).join("");
-  }
-  if (target || CFG.togetherSince) { renderCountdown(); setInterval(renderCountdown, 1000); }
 
   /* ------------------------------------------------------------------
-     Reasons shuffle
+     Wishes — reveal one card at a time
   ------------------------------------------------------------------ */
-  const reasons = Array.isArray(CFG.reasons) ? CFG.reasons.slice() : [];
-  const reasonCard = $("#reason-card");
-  const reasonText = $("#reason-text");
-  const reasonCount = $("#reason-count");
-  let rIndex = 0;
-  function showReason(i) {
-    if (!reasonText || reasons.length === 0) return;
-    reasonText.textContent = reasons[i];
-    reasonCount.textContent = (i + 1) + " / " + reasons.length;
+  const wishes = Array.isArray(CFG.wishes) ? CFG.wishes : [];
+  const wishList = $("#wish-list");
+  const wishReveal = $("#wish-reveal");
+  const wishDone = $("#wish-done");
+  const wishCount = $("#wish-count");
+  let wIndex = 0;
+
+  function renderWishCount() { if (wishCount) wishCount.textContent = wishes.length ? "Wish " + wIndex + " of " + wishes.length : ""; }
+  function revealNextWish() {
+    if (wIndex >= wishes.length) return;
+    const w = wishes[wIndex];
+    const card = document.createElement("div");
+    card.className = "wish-card";
+    card.innerHTML = '<span class="wl">' + esc(w.lead || "") + "</span> " + esc(w.text || "") + ' <span class="wt">' + esc(w.tail || "") + "</span>";
+    wishList.appendChild(card);
+    wIndex++;
+    renderWishCount();
+    const r = wishReveal.getBoundingClientRect();
+    burstConfetti(r.left + r.width / 2, r.top + r.height / 2, 28);
+    if (wIndex >= wishes.length) { wishReveal.hidden = true; wishDone.hidden = false; }
+    else if (wIndex >= 1 && CFG.revealAgainButton) { wishReveal.textContent = CFG.revealAgainButton; }
   }
-  showReason(0);
-  $("#reason-next").addEventListener("click", () => {
-    if (reasons.length === 0) return;
-    reasonCard.classList.add("swap");
-    const r = $("#reason-next").getBoundingClientRect();
-    burstConfetti(r.left + r.width / 2, r.top + r.height / 2, 26);
-    setTimeout(() => {
-      rIndex = (rIndex + 1) % reasons.length;
-      showReason(rIndex);
-      reasonCard.classList.remove("swap");
-    }, 320);
-  });
+  if (wishReveal) {
+    revealNextWish();                       // first wish is visible straight away
+    wishReveal.addEventListener("click", revealNextWish);
+  }
+  if (wishDone) wishDone.addEventListener("click", () => goTo(3));
 
   /* ------------------------------------------------------------------
      Memories grid + placeholders + 3D tilt + lightbox
   ------------------------------------------------------------------ */
   const grad = [
-    "linear-gradient(135deg,#7a1e56,#f472b6)",
-    "linear-gradient(135deg,#45103f,#fb7185)",
-    "linear-gradient(135deg,#b02a6e,#e8c36b)",
-    "linear-gradient(135deg,#2b0b2e,#b02a6e)",
-    "linear-gradient(135deg,#7a1e56,#e8c36b)",
-    "linear-gradient(135deg,#45103f,#f472b6)",
+    "linear-gradient(135deg,#ff9ccd,#c4b5fd)",
+    "linear-gradient(135deg,#f9a8d4,#f6b64c)",
+    "linear-gradient(135deg,#c4b5fd,#ff92c6)",
+    "linear-gradient(135deg,#ffb3d9,#a78bfa)",
+    "linear-gradient(135deg,#fbcfe8,#f472b6)",
+    "linear-gradient(135deg,#ddd6fe,#f9a8d4)",
   ];
-  const camSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.4"><path d="M3 8h3l2-2h8l2 2h3v11H3z"/><circle cx="12" cy="13" r="3.4"/></svg>';
+  const camSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.95)" stroke-width="1.5"><path d="M3 8h3l2-2h8l2 2h3v11H3z"/><circle cx="12" cy="13" r="3.4"/></svg>';
 
   const memGrid = $("#memory-grid");
   const memories = Array.isArray(CFG.memories) ? CFG.memories : [];
+  function placeholder(idx) { return '<div class="memory-placeholder" style="background:' + grad[idx % grad.length] + '">' + camSVG + "</div>"; }
   function mediaHTML(m, idx) {
-    if (m.img) return `<img src="${m.img}" alt="${m.caption || "A memory"}" loading="lazy" />`;
-    return `<div class="memory-placeholder" style="background:${grad[idx % grad.length]}">${camSVG}</div>`;
+    if (m.img) return '<img src="' + esc(m.img) + '" alt="' + esc(m.caption || "A memory") + '" loading="lazy" onerror="this.parentNode.innerHTML=this.parentNode.dataset.fallback;" />';
+    return placeholder(idx);
   }
   if (memGrid) {
-    memGrid.innerHTML = memories.map((m, idx) => `
-      <article class="memory-card" data-idx="${idx}" tabindex="0" aria-label="${m.date || "Memory"}: ${m.caption || ""}">
-        <span class="memory-tag">${String(idx + 1).padStart(2, "0")}</span>
-        <div class="memory-media">${mediaHTML(m, idx)}<span class="memory-glare"></span></div>
-        <div class="memory-info">
-          <div class="memory-date">${m.date || ""}</div>
-          <div class="memory-caption">${m.caption || ""}</div>
-        </div>
-      </article>`).join("");
+    memGrid.innerHTML = memories.map((m, idx) => {
+      const fb = placeholder(idx).replace(/"/g, "&quot;");
+      return '<article class="memory-card" data-idx="' + idx + '" tabindex="0" aria-label="' + esc(m.title || "Memory") + ": " + esc(m.caption || "") + '">' +
+        '<div class="memory-media" data-fallback="' + fb + '">' + mediaHTML(m, idx) + '<span class="memory-glare"></span></div>' +
+        '<span class="memory-tag">' + String(idx + 1).padStart(2, "0") + " · a moment</span>" +
+        '<div class="memory-date">' + esc(m.title || "") + "</div>" +
+        '<div class="memory-caption">' + esc(m.caption || "") + "</div>" +
+        "</article>";
+    }).join("");
 
-    // 3D tilt
     if (!isTouch && !reduceMotion) {
       $$(".memory-card", memGrid).forEach((card) => {
         const glare = $(".memory-glare", card);
         card.addEventListener("mousemove", (e) => {
           const r = card.getBoundingClientRect();
           const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
-          const rx = (0.5 - py) * 12, ry = (px - 0.5) * 14;
-          card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-6px)`;
+          const rx = (0.5 - py) * 8, ry = (px - 0.5) * 10;
+          card.style.transform = "perspective(800px) rotateX(" + rx + "deg) rotateY(" + ry + "deg) translateY(-6px)";
           if (glare) { glare.style.setProperty("--mx", px * 100 + "%"); glare.style.setProperty("--my", py * 100 + "%"); }
         });
         card.addEventListener("mouseleave", () => { card.style.transform = ""; });
       });
     }
 
-    // Lightbox
     const lb = $("#lightbox"), lbInner = $("#lightbox-inner");
     function openLB(idx) {
       const m = memories[idx]; if (!m) return;
-      lbInner.innerHTML = `
-        <div class="lb-media">${mediaHTML(m, idx)}</div>
-        <div class="lb-date">${m.date || ""}</div>
-        <div class="lb-caption">${m.caption || ""}</div>`;
+      const fb = placeholder(idx).replace(/"/g, "&quot;");
+      lbInner.innerHTML =
+        '<div class="lb-media memory-media" data-fallback="' + fb + '">' + mediaHTML(m, idx) + "</div>" +
+        '<div class="lb-date">' + esc(m.title || "") + "</div>" +
+        '<div class="lb-caption">' + esc(m.caption || "") + "</div>";
       lb.hidden = false;
     }
     function closeLB() { lb.hidden = true; }
@@ -417,16 +385,72 @@
   }
 
   /* ------------------------------------------------------------------
-     Make a wish
+     Countdown (its page is the finale reveal)
   ------------------------------------------------------------------ */
-  const wishBtn = $("#wish-btn");
-  const wishOverlay = $("#wish-overlay");
-  if (wishBtn) {
-    wishBtn.addEventListener("click", () => {
-      confettiRain(3200);
-      burstConfetti(W / 2, H / 2, 180);
-      wishOverlay.hidden = false;
-      setTimeout(() => { wishOverlay.hidden = true; }, 3400);
-    });
+  function nextBirthday(dateStr) {
+    const now = new Date();
+    const base = new Date(dateStr + "T00:00:00");
+    if (isNaN(base)) return null;
+    let target = new Date(now.getFullYear(), base.getMonth(), base.getDate(), 0, 0, 0);
+    const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (target < todayMidnight) target.setFullYear(now.getFullYear() + 1);
+    return target;
   }
+  const grid = $("#count-grid");
+  const countSub = $("#count-sub");
+  const target = CFG.birthday ? nextBirthday(CFG.birthday) : null;
+  const birthdayDate = CFG.birthday ? new Date(CFG.birthday + "T00:00:00") : null;
+  let celebrated = false;
+  let countdownStarted = false;
+
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function cells(list) {
+    if (!grid) return;
+    grid.style.gridTemplateColumns = "repeat(" + Math.min(4, list.length) + ", 1fr)";
+    grid.innerHTML = list.map(([label, num]) =>
+      '<div class="count-cell"><div class="count-num">' + num + '</div><div class="count-label">' + label + "</div></div>"
+    ).join("");
+  }
+  function renderCountdown() {
+    if (!grid) return;
+    const now = new Date();
+    const subParts = [];
+    if (target) {
+      const isBirthdayToday = birthdayDate && !isNaN(birthdayDate) &&
+        now.getMonth() === birthdayDate.getMonth() && now.getDate() === birthdayDate.getDate();
+      if (isBirthdayToday) {
+        cells([["Days", 0], ["Hours", "00"], ["Minutes", "00"], ["Seconds", "00"]]);
+        subParts.push(CFG.birthdayMessage || "🎉 Happy Birthday! 🎂");
+        if (!celebrated) { celebrated = true; confettiRain(3000); }
+      } else {
+        const diff = Math.max(0, target - now);
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        cells([["Days", d], ["Hours", pad(h)], ["Minutes", pad(m)], ["Seconds", pad(s)]]);
+        if (CFG.countdownSub) subParts.push(CFG.countdownSub);
+      }
+    }
+    if (CFG.togetherSince) {
+      const since = new Date(CFG.togetherSince + "T00:00:00");
+      if (!isNaN(since)) {
+        const days = Math.floor((now - since) / 86400000);
+        if (!target) cells([["Days together", days.toLocaleString()]]);
+        subParts.push(days.toLocaleString() + " days of us — and counting. 💞");
+      }
+    }
+    if (countSub) countSub.textContent = subParts.join("  ·  ");
+  }
+  function startCountdown() {
+    if (countdownStarted) return; countdownStarted = true;
+    if (!(target || CFG.togetherSince)) return;
+    renderCountdown();
+    setInterval(renderCountdown, 1000);
+  }
+
+  /* ------------------------------------------------------------------
+     Start on page 0
+  ------------------------------------------------------------------ */
+  updateChrome();
 })();
