@@ -345,7 +345,7 @@
     memGrid.innerHTML = memories.map((m, idx) => {
       const fb = placeholder(idx).replace(/"/g, "&quot;");
       return '<article class="memory-card" data-idx="' + idx + '" tabindex="0" aria-label="' + esc(m.title || "Memory") + ": " + esc(m.caption || "") + '">' +
-        '<div class="memory-media" data-fallback="' + fb + '">' + mediaHTML(m, idx) + '<span class="memory-glare"></span></div>' +
+        '<div class="memory-media"' + (m.ratio ? ' style="aspect-ratio:' + esc(m.ratio) + '"' : '') + ' data-fallback="' + fb + '">' + mediaHTML(m, idx) + '<span class="memory-glare"></span></div>' +
         '<span class="memory-tag">' + String(idx + 1).padStart(2, "0") + " · a moment</span>" +
         '<div class="memory-date">' + esc(m.title || "") + "</div>" +
         '<div class="memory-caption">' + esc(m.caption || "") + "</div>" +
