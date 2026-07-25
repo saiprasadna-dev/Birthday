@@ -148,23 +148,37 @@
   const audio = $("#bg-music");
   const musicBtn = $("#music-toggle");
   let musicReady = false;
-  if (CFG.musicFile) { audio.src = CFG.musicFile; musicReady = true; }
+  let wantMusic = false;    // gift opened → the song should be playing
+  let musicStarted = false; // it has actually begun at least once
+  if (CFG.musicFile) { audio.src = CFG.musicFile; audio.loop = true; musicReady = true; }
+
   function tryPlayMusic() {
-    if (!musicReady) return;
+    if (!musicReady || musicStarted) return;
+    wantMusic = true;
+    audio.loop = true;
     audio.volume = 0;
     const p = audio.play();
     if (p && p.then) {
       p.then(() => {
+        musicStarted = true;
         musicBtn.classList.add("playing");
         musicBtn.setAttribute("aria-label", "Pause background music");
         let v = 0; const fade = setInterval(() => { v = Math.min(0.55, v + 0.03); audio.volume = v; if (v >= 0.55) clearInterval(fade); }, 80);
-      }).catch(() => {});
+      }).catch(() => { /* autoplay blocked — the safety net below retries on the next tap */ });
     }
   }
+
+  // Safety net: if the very first attempt is blocked, start on the next user tap.
+  document.addEventListener("pointerdown", () => {
+    if (wantMusic && !musicStarted && musicReady && audio.paused) tryPlayMusic();
+  }, { passive: true });
+
   musicBtn.addEventListener("click", () => {
     if (!musicReady) { musicBtn.animate([{ transform: "scale(1)" }, { transform: "scale(0.9)" }, { transform: "scale(1)" }], { duration: 250 }); return; }
-    if (audio.paused) { audio.play().then(() => { audio.volume = 0.55; musicBtn.classList.add("playing"); }).catch(() => {}); }
-    else { audio.pause(); musicBtn.classList.remove("playing"); }
+    if (audio.paused) {
+      audio.loop = true; wantMusic = true;
+      audio.play().then(() => { audio.volume = 0.55; musicStarted = true; musicBtn.classList.add("playing"); }).catch(() => {});
+    } else { audio.pause(); musicBtn.classList.remove("playing"); }
   });
 
   /* ==================================================================
