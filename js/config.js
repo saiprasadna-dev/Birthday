@@ -11,7 +11,7 @@ window.BIRTHDAY_CONFIG = {
   yourName: "Your Husband",     // 👈 your name (shown in the finale & footer)
 
   /* --- Dates (YYYY-MM-DD) ----------------------------------------- */
-  birthday: "2026-08-15",       // her next birthday — used for the final countdown
+  birthday: "2027-07-28",       // her next birthday — used for the final countdown
   togetherSince: "2018-02-14",  // when your story began — "days together" counter ("" to hide)
 
   /* --- Intro (the little gift you open) --------------------------- */

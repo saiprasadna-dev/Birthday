@@ -391,8 +391,11 @@
     const now = new Date();
     const base = new Date(dateStr + "T00:00:00");
     if (isNaN(base)) return null;
-    let target = new Date(now.getFullYear(), base.getMonth(), base.getDate(), 0, 0, 0);
     const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    // If the configured date (with its year) is still upcoming, count to it exactly.
+    if (base >= todayMidnight) return base;
+    // Otherwise treat it as a recurring birthday: next occurrence of the month/day.
+    let target = new Date(now.getFullYear(), base.getMonth(), base.getDate(), 0, 0, 0);
     if (target < todayMidnight) target.setFullYear(now.getFullYear() + 1);
     return target;
   }
