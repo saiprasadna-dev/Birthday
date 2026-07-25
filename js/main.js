@@ -338,7 +338,7 @@
   const memories = Array.isArray(CFG.memories) ? CFG.memories : [];
   function placeholder(idx) { return '<div class="memory-placeholder" style="background:' + grad[idx % grad.length] + '">' + camSVG + "</div>"; }
   function mediaHTML(m, idx) {
-    if (m.img) return '<img src="' + esc(m.img) + '" alt="' + esc(m.caption || "A memory") + '" loading="lazy" onerror="this.parentNode.innerHTML=this.parentNode.dataset.fallback;" />';
+    if (m.img) return '<img src="' + esc(m.img) + '" alt="' + esc(m.caption || "A memory") + '" loading="lazy" style="object-position:' + esc(m.pos || "center center") + '" onerror="this.parentNode.innerHTML=this.parentNode.dataset.fallback;" />';
     return placeholder(idx);
   }
   if (memGrid) {
