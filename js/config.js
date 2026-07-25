@@ -46,7 +46,7 @@ window.BIRTHDAY_CONFIG = {
   memories: [
     { img: "assets/photo1.jpg", title: "Where It All Began", caption: "Two hearts, one look, and a story I never want to end. 💗", pos: "center 22%" },
     { img: "assets/photo2.jpg", title: "Just Us", caption: "May our journey ahead stay full of happiness, laughter and endless smiles. 😊💕", pos: "center 42%" },
-    { img: "assets/photo3.jpg", title: "My Favourite View", caption: "Keep being the beautiful soul you are — you make every moment brighter. 🌸💖" },
+    { img: "assets/photo3.jpg", title: "Chasing Horizons", caption: "Let's keep laughing, chasing waves and flying off to see the whole wide world — hand in hand, again and again. 🌊✈️💗", pos: "42% center" },
   ],
 
   /* --- Finale letter ---------------------------------------------- */
