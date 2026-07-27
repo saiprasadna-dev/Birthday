@@ -416,7 +416,6 @@
   const grid = $("#count-grid");
   const countSub = $("#count-sub");
   const target = CFG.birthday ? nextBirthday(CFG.birthday) : null;
-  const birthdayDate = CFG.birthday ? new Date(CFG.birthday + "T00:00:00") : null;
   let celebrated = false;
   let countdownStarted = false;
 
@@ -433,8 +432,13 @@
     const now = new Date();
     const subParts = [];
     if (target) {
-      const isBirthdayToday = birthdayDate && !isNaN(birthdayDate) &&
-        now.getMonth() === birthdayDate.getMonth() && now.getDate() === birthdayDate.getDate();
+      // Only "today" once we've actually reached the target date — compare the
+      // full date incl. year, so an explicit future birthday like 2027-07-28
+      // counts down instead of celebrating on July 28 of an earlier year.
+      const isBirthdayToday =
+        now.getFullYear() === target.getFullYear() &&
+        now.getMonth() === target.getMonth() &&
+        now.getDate() === target.getDate();
       if (isBirthdayToday) {
         cells([["Days", 0], ["Hours", "00"], ["Minutes", "00"], ["Seconds", "00"]]);
         subParts.push(CFG.birthdayMessage || "🎉 Happy Birthday! 🎂");
