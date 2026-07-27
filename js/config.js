@@ -12,7 +12,7 @@ window.BIRTHDAY_CONFIG = {
 
   /* --- Dates (YYYY-MM-DD) ----------------------------------------- */
   birthday: "2027-07-28",       // her next birthday — used for the final countdown
-  togetherSince: "2018-02-14",  // when your story began — "days together" counter ("" to hide)
+  togetherSince: "",            // "days together" counter hidden — set a date like "2018-02-14" to show it
 
   /* --- Intro (the little gift you open) --------------------------- */
   introHint: "A little surprise, wrapped just for you",
