@@ -34,6 +34,11 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* The [hidden] attribute must win over the display rules below.
+   .lightbox / .wish-overlay set display:flex, which would otherwise
+   override the browser default and leave them covering the page on load. */
+[hidden] { display: none !important; }
+
 html { scroll-behavior: smooth; }
 
 body {
